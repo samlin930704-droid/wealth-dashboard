@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>资产增长管理台</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">¥</div>
+          <div>
+            <h1>资产增长管理台</h1>
+            <p>本地数据 · 示例账户</p>
+          </div>
+        </div>
+
+        <nav class="nav">
+          <a href="#overview" class="active">总览</a>
+          <a href="#portfolio">资产配置</a>
+          <a href="#records">资产明细</a>
+          <a href="#liabilities">负债</a>
+          <a href="#goals">目标</a>
+          <a href="#sync">云同步</a>
+        </nav>
+
+        <div class="sidebar-panel">
+          <span class="panel-label">风险偏好</span>
+          <select id="riskProfile">
+            <option value="conservative">稳健</option>
+            <option value="balanced">平衡</option>
+            <option value="growth">成长</option>
+          </select>
+          <p id="riskProfileText">以现金流、防守资产和低波动增长为优先。</p>
+        </div>
+      </aside>
+
+      <main class="main">
+        <section class="toolbar">
+          <div>
+            <p class="eyebrow">Wealth Dashboard</p>
+            <h2>看清资产、负债、目标和风险</h2>
+          </div>
+          <div class="toolbar-actions">
+            <button id="exportCsv" class="button secondary" type="button">导出 CSV</button>
+            <button id="resetDemo" class="button ghost" type="button">重置示例</button>
+          </div>
+        </section>
+
+        <section id="overview" class="metrics-grid" aria-label="资产总览">
+          <article class="metric-card">
+            <span>总资产</span>
+            <strong id="totalAssets">¥0</strong>
+            <small id="assetDelta">较成本 ¥0</small>
+          </article>
+          <article class="metric-card">
+            <span>负债</span>
+            <strong id="totalLiabilities">¥0</strong>
+            <small id="debtRatio">负债率 0%</small>
+          </article>
+          <article class="metric-card highlight">
+            <span>净资产</span>
+            <strong id="netWorth">¥0</strong>
+            <small id="goalGap">距离目标 ¥0</small>
+          </article>
+          <article class="metric-card">
+            <span>月投入</span>
+            <strong id="monthlyContribution">¥0</strong>
+            <small id="projectionText">预计达成时间待计算</small>
+          </article>
+        </section>
+
+        <section class="content-grid">
+          <article id="portfolio" class="panel allocation-panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Allocation</p>
+                <h3>资产配置</h3>
+              </div>
+              <span id="liquidityText" class="status-pill">流动性充足</span>
+            </div>
+            <div class="allocation-layout">
+              <div class="donut" id="allocationDonut" aria-label="资产分类占比图"></div>
+              <div id="allocationLegend" class="legend"></div>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Risk</p>
+                <h3>风险提醒</h3>
+              </div>
+              <span id="riskScore" class="status-pill">0 分</span>
+            </div>
+            <div id="riskAlerts" class="alert-list"></div>
+          </article>
+        </section>
+
+        <section id="goals" class="panel goal-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Goal</p>
+              <h3>增长目标</h3>
+            </div>
+            <button id="saveGoal" class="button secondary" type="button">保存目标</button>
+          </div>
+          <div class="goal-grid">
+            <label>
+              目标净资产
+              <input id="targetNetWorth" type="number" min="0" step="1000" />
+            </label>
+            <label>
+              每月新增投入
+              <input id="goalMonthlyInput" type="number" min="0" step="100" />
+            </label>
+            <label>
+              年化预期收益
+              <input id="expectedReturn" type="number" min="-50" max="80" step="0.1" />
+            </label>
+          </div>
+          <div class="progress-wrap">
+            <div class="progress-top">
+              <span id="progressLabel">目标进度 0%</span>
+              <span id="progressAmount">¥0 / ¥0</span>
+            </div>
+            <div class="progress-track">
+              <div id="goalProgress" class="progress-bar"></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="records" class="panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Assets</p>
+              <h3>资产明细</h3>
+            </div>
+            <button id="addAsset" class="button primary" type="button">新增资产</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>名称</th>
+                  <th>类型</th>
+                  <th>账户</th>
+                  <th>当前金额</th>
+                  <th>成本</th>
+                  <th>收益</th>
+                  <th>风险</th>
+                  <th>流动性</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="assetRows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="liabilities" class="panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Liabilities</p>
+              <h3>负债管理</h3>
+            </div>
+            <button id="addLiability" class="button primary" type="button">新增负债</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>名称</th>
+                  <th>类型</th>
+                  <th>余额</th>
+                  <th>利率</th>
+                  <th>月供</th>
+                  <th>到期日</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="liabilityRows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="sync" class="panel sync-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Cloud Sync</p>
+              <h3>云端同步</h3>
+            </div>
+            <span id="syncStatus" class="status-pill">未配置</span>
+          </div>
+          <div class="sync-grid">
+            <label>
+              Supabase 项目 URL
+              <input id="supabaseUrl" type="url" placeholder="https://xxxx.supabase.co" autocomplete="off" />
+            </label>
+            <label>
+              Supabase publishable / anon public key
+              <input id="supabaseAnonKey" type="password" placeholder="sb_publishable_... 或 eyJ..." autocomplete="off" />
+            </label>
+            <label>
+              同步空间 ID
+              <input id="syncSpaceId" type="text" placeholder="例如 family-main-2026" autocomplete="off" />
+            </label>
+            <label class="toggle-line">
+              <input id="autoSyncEnabled" type="checkbox" />
+              <span>保存后自动上传</span>
+            </label>
+          </div>
+          <div class="sync-meta">
+            <div>
+              <span>本机修改</span>
+              <strong id="localUpdatedAt">暂无</strong>
+            </div>
+            <div>
+              <span>最近同步</span>
+              <strong id="lastSyncAt">暂无</strong>
+            </div>
+            <div>
+              <span>云端版本</span>
+              <strong id="cloudUpdatedAt">暂无</strong>
+            </div>
+          </div>
+          <div class="sync-actions">
+            <button id="saveCloudConfig" class="button secondary" type="button">保存配置</button>
+            <button id="generateSyncSpace" class="button secondary" type="button">生成同步 ID</button>
+            <button id="testCloud" class="button secondary" type="button">测试连接</button>
+            <button id="pullCloud" class="button secondary" type="button">从云端拉取</button>
+            <button id="pushCloud" class="button primary" type="button">上传到云端</button>
+            <button id="clearCloudConfig" class="button ghost" type="button">清除配置</button>
+          </div>
+          <p class="sync-note">
+            先在 Supabase SQL Editor 运行 <a href="supabase-schema.sql" target="_blank">supabase-schema.sql</a>，再填写 Project URL、publishable key 或 anon public key，以及同步空间 ID。同步空间 ID 相当于这份数据的访问口令，请使用随机 ID 并只在自己的设备间复制；不要填写 service_role key、secret key、数据库密码或账号密码。
+          </p>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="recordDialog">
+      <form method="dialog" class="dialog-card" id="recordForm">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow" id="dialogEyebrow">Record</p>
+            <h3 id="dialogTitle">编辑记录</h3>
+          </div>
+          <button class="icon-button" type="button" id="closeDialog" aria-label="关闭">×</button>
+        </div>
+        <div id="formFields" class="form-grid"></div>
+        <div class="dialog-actions">
+          <button class="button ghost" type="button" id="cancelDialog">取消</button>
+          <button class="button primary" type="submit">保存</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>
